@@ -49,7 +49,7 @@ class InstanceView(ft.Column):
                 spacing=6,
                 tight=True,
             ),
-            padding=ft.padding.symmetric(horizontal=10, vertical=6),
+            padding=ft.Padding.symmetric(horizontal=10, vertical=6),
             border_radius=20,
             bgcolor=SURFACE2,
         )
@@ -66,7 +66,7 @@ class InstanceView(ft.Column):
                     icon=ft.icons.ACCOUNT_TREE,
                     content=ft.Container(
                         content=self._workflows_col,
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -75,7 +75,7 @@ class InstanceView(ft.Column):
                     icon=ft.icons.VPN_KEY,
                     content=ft.Container(
                         content=self._creds_col,
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                     ),
                 ),
             ],
@@ -110,7 +110,7 @@ class InstanceView(ft.Column):
             padding=16,
             bgcolor=SURFACE,
             border_radius=12,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
 
     def did_mount(self) -> None:
@@ -290,7 +290,7 @@ class InstanceView(ft.Column):
             padding=14,
             bgcolor=SURFACE,
             border_radius=10,
-            border=ft.border.all(
+            border=ft.Border.all(
                 1, SUCCESS + "66" if active else BORDER
             ),
         )
@@ -380,7 +380,7 @@ class InstanceView(ft.Column):
                     padding=10,
                     bgcolor=SURFACE2,
                     border_radius=8,
-                    border=ft.border.all(1, BORDER),
+                    border=ft.Border.all(1, BORDER),
                 )
             )
 

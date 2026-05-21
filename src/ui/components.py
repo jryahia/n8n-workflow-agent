@@ -97,7 +97,7 @@ def theme_container(
         padding=padding,
         border_radius=border_radius,
         bgcolor=bgcolor,
-        border=ft.border.all(1, border_color),
+        border=ft.Border.all(1, border_color),
     )
 
 
@@ -116,7 +116,7 @@ def accent_button(
             bgcolor=ACCENT,
             color=ft.Colors.WHITE,
             shape=ft.RoundedRectangleBorder(radius=6),
-            padding=ft.padding.symmetric(horizontal=16, vertical=10),
+            padding=ft.Padding.symmetric(horizontal=16, vertical=10),
         ),
     )
 
@@ -163,10 +163,10 @@ def muted_text(text: str, size: int = 13) -> ft.Text:
 def tag_chip(label: str, color: str = ACCENT) -> ft.Container:
     return ft.Container(
         content=ft.Text(label, size=11, color=ft.Colors.WHITE),
-        padding=ft.padding.symmetric(horizontal=8, vertical=3),
+        padding=ft.Padding.symmetric(horizontal=8, vertical=3),
         border_radius=12,
         bgcolor=color + "33",
-        border=ft.border.all(1, color + "66"),
+        border=ft.Border.all(1, color + "66"),
     )
 
 
@@ -187,7 +187,7 @@ def status_badge(label: str, active: bool) -> ft.Container:
             spacing=4,
             tight=True,
         ),
-        padding=ft.padding.symmetric(horizontal=8, vertical=4),
+        padding=ft.Padding.symmetric(horizontal=8, vertical=4),
         border_radius=12,
         bgcolor=bg,
     )
@@ -272,7 +272,7 @@ def node_card(
         padding=10,
         border_radius=8,
         bgcolor=SURFACE2,
-        border=ft.border.all(1, color + "44"),
+        border=ft.Border.all(1, color + "44"),
         on_click=on_click,
         ink=True,
     )
@@ -315,7 +315,7 @@ def connection_diagram(workflow: dict[str, Any]) -> ft.Control:
                         size=13,
                         color=color,
                     ),
-                    padding=ft.padding.symmetric(horizontal=10, vertical=6),
+                    padding=ft.Padding.symmetric(horizontal=10, vertical=6),
                     border_radius=6,
                     bgcolor=SURFACE2,
                 )
@@ -336,10 +336,10 @@ def connection_diagram(workflow: dict[str, Any]) -> ft.Control:
                     color=color,
                     weight=ft.FontWeight.W_500,
                 ),
-                padding=ft.padding.symmetric(horizontal=10, vertical=6),
+                padding=ft.Padding.symmetric(horizontal=10, vertical=6),
                 border_radius=6,
                 bgcolor=color + "22",
-                border=ft.border.all(1, color + "55"),
+                border=ft.Border.all(1, color + "55"),
             )
         )
 
@@ -436,7 +436,7 @@ def json_text_view(json_str: str, max_height: int = 400) -> ft.Container:
         bgcolor="#0d1117",
         border_radius=8,
         padding=12,
-        border=ft.border.all(1, BORDER),
+        border=ft.Border.all(1, BORDER),
         height=max_height,
     )
 

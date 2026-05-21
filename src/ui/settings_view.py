@@ -170,7 +170,7 @@ class SettingsView(ft.Column):
                 padding=20,
                 bgcolor=SURFACE,
                 border_radius=12,
-                border=ft.border.all(1, BORDER),
+                border=ft.Border.all(1, BORDER),
             ),
             # LLM Configuration
             ft.Container(
@@ -197,7 +197,7 @@ class SettingsView(ft.Column):
                 padding=20,
                 bgcolor=SURFACE,
                 border_radius=12,
-                border=ft.border.all(1, BORDER),
+                border=ft.Border.all(1, BORDER),
             ),
             # API Keys
             ft.Container(
@@ -214,7 +214,7 @@ class SettingsView(ft.Column):
                 padding=20,
                 bgcolor=SURFACE,
                 border_radius=12,
-                border=ft.border.all(1, BORDER),
+                border=ft.Border.all(1, BORDER),
             ),
             # Preferences
             ft.Container(
@@ -229,7 +229,7 @@ class SettingsView(ft.Column):
                 padding=20,
                 bgcolor=SURFACE,
                 border_radius=12,
-                border=ft.border.all(1, BORDER),
+                border=ft.Border.all(1, BORDER),
             ),
             # Save Button
             ft.Container(
@@ -249,7 +249,7 @@ class SettingsView(ft.Column):
                     ],
                     spacing=12,
                 ),
-                padding=ft.padding.symmetric(vertical=8),
+                padding=ft.Padding.symmetric(vertical=8),
             ),
             # About
             ft.Container(
@@ -275,7 +275,7 @@ class SettingsView(ft.Column):
                 padding=20,
                 bgcolor=SURFACE,
                 border_radius=12,
-                border=ft.border.all(1, BORDER),
+                border=ft.Border.all(1, BORDER),
             ),
         ]
 

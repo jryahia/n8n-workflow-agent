@@ -75,7 +75,7 @@ class LibraryView(ft.Column):
                     icon=ft.icons.AUTO_AWESOME,
                     content=ft.Container(
                         content=self._workflows_col,
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -84,7 +84,7 @@ class LibraryView(ft.Column):
                     icon=ft.icons.BOOKMARK,
                     content=ft.Container(
                         content=self._templates_col,
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -93,7 +93,7 @@ class LibraryView(ft.Column):
                     icon=ft.icons.UPLOAD_FILE,
                     content=ft.Container(
                         content=self._build_import_panel(),
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -124,7 +124,7 @@ class LibraryView(ft.Column):
             padding=16,
             bgcolor=SURFACE,
             border_radius=12,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
 
     def _build_import_panel(self) -> ft.Container:
@@ -273,7 +273,7 @@ class LibraryView(ft.Column):
                                     size=11,
                                     color=SUCCESS if deployed else TEXT_MUTED,
                                 ),
-                                padding=ft.padding.symmetric(horizontal=8, vertical=3),
+                                padding=ft.Padding.symmetric(horizontal=8, vertical=3),
                                 border_radius=10,
                                 bgcolor=(SUCCESS + "22") if deployed else SURFACE,
                             ),
@@ -329,7 +329,7 @@ class LibraryView(ft.Column):
             padding=14,
             bgcolor=SURFACE,
             border_radius=10,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
 
     def _render_templates(self) -> None:
@@ -369,7 +369,7 @@ class LibraryView(ft.Column):
                             ),
                             ft.Container(
                                 content=ft.Text(category, size=11, color=ACCENT),
-                                padding=ft.padding.symmetric(horizontal=8, vertical=3),
+                                padding=ft.Padding.symmetric(horizontal=8, vertical=3),
                                 border_radius=10,
                                 bgcolor=ACCENT + "22",
                             ),
@@ -397,7 +397,7 @@ class LibraryView(ft.Column):
             padding=14,
             bgcolor=SURFACE,
             border_radius=10,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
 
     def _on_search_change(self, e: ft.ControlEvent) -> None:

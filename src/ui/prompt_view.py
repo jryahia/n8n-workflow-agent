@@ -108,7 +108,7 @@ class PromptView(ft.Column):
                     on_click=lambda e, prompt=p: self._use_example(prompt),
                     style=ft.ButtonStyle(
                         color=TEXT_MUTED,
-                        padding=ft.padding.symmetric(horizontal=8, vertical=4),
+                        padding=ft.Padding.symmetric(horizontal=8, vertical=4),
                     ),
                 )
                 for p in EXAMPLE_PROMPTS
@@ -151,7 +151,7 @@ class PromptView(ft.Column):
             padding=20,
             bgcolor=SURFACE,
             border_radius=12,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
 
     def _empty_state(self) -> ft.Container:
@@ -234,7 +234,7 @@ class PromptView(ft.Column):
                     icon=ft.icons.ACCOUNT_TREE,
                     content=ft.Container(
                         content=self._build_overview_tab(workflow_json, nodes),
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                     ),
                 ),
                 ft.Tab(
@@ -242,7 +242,7 @@ class PromptView(ft.Column):
                     icon=ft.icons.LAYERS,
                     content=ft.Container(
                         content=self._build_nodes_tab(nodes),
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                     ),
                 ),
                 ft.Tab(
@@ -250,7 +250,7 @@ class PromptView(ft.Column):
                     icon=ft.icons.CODE,
                     content=ft.Container(
                         content=json_text_view(json_str, max_height=500),
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                     ),
                 ),
             ],
@@ -318,7 +318,7 @@ class PromptView(ft.Column):
                     padding=20,
                     bgcolor=SURFACE,
                     border_radius=12,
-                    border=ft.border.all(1, BORDER),
+                    border=ft.Border.all(1, BORDER),
                     expand=True,
                 )
             ],
@@ -337,7 +337,7 @@ class PromptView(ft.Column):
                     padding=12,
                     bgcolor=SURFACE2,
                     border_radius=8,
-                    border=ft.border.all(1, BORDER),
+                    border=ft.Border.all(1, BORDER),
                 ),
                 ft.Container(height=16),
                 section_title("Workflow Info", 13),
@@ -361,7 +361,7 @@ class PromptView(ft.Column):
                     padding=12,
                     bgcolor=SURFACE2,
                     border_radius=8,
-                    border=ft.border.all(1, BORDER),
+                    border=ft.Border.all(1, BORDER),
                 ),
             ],
             spacing=0,
@@ -395,7 +395,7 @@ class PromptView(ft.Column):
                         padding=12,
                         bgcolor=SURFACE2,
                         border_radius=8,
-                        border=ft.border.all(1, ERROR + "44"),
+                        border=ft.Border.all(1, ERROR + "44"),
                     ),
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -404,7 +404,7 @@ class PromptView(ft.Column):
             padding=24,
             bgcolor=SURFACE,
             border_radius=12,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
             alignment=ft.alignment.center,
         )
 

@@ -92,7 +92,7 @@ async def main(page: ft.Page) -> None:
     content_area = ft.Container(
         content=views[0],
         expand=True,
-        padding=ft.padding.all(20),
+        padding=ft.Padding.all(20),
     )
 
     # ── Navigation Rail ────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ async def main(page: ft.Page) -> None:
                         spacing=6,
                         tight=True,
                     ),
-                    padding=ft.padding.symmetric(horizontal=16),
+                    padding=ft.Padding.symmetric(horizontal=16),
                 ),
                 ft.Container(
                     content=ft.Text(
@@ -157,15 +157,15 @@ async def main(page: ft.Page) -> None:
                         spacing=4,
                         tight=True,
                     ),
-                    padding=ft.padding.symmetric(horizontal=16),
+                    padding=ft.Padding.symmetric(horizontal=16),
                 ),
             ],
             spacing=0,
         ),
         height=48,
         bgcolor=SURFACE,
-        border=ft.border.only(bottom=ft.BorderSide(1, BORDER)),
-        padding=ft.padding.symmetric(horizontal=8),
+        border=ft.Border.only(bottom=ft.BorderSide(1, BORDER)),
+        padding=ft.Padding.symmetric(horizontal=8),
     )
 
     # ── Layout ────────────────────────────────────────────────────────────────
@@ -174,7 +174,7 @@ async def main(page: ft.Page) -> None:
             ft.Container(
                 content=nav_rail,
                 bgcolor=SURFACE,
-                border=ft.border.only(right=ft.BorderSide(1, BORDER)),
+                border=ft.Border.only(right=ft.BorderSide(1, BORDER)),
                 width=90,
             ),
             content_area,

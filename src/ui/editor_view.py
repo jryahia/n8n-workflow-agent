@@ -57,7 +57,7 @@ class EditorView(ft.Column):
             padding=12,
             bgcolor=SURFACE2,
             border_radius=8,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
         self._json_container = ft.Container(
             content=muted_text("No workflow loaded"),
@@ -90,19 +90,19 @@ class EditorView(ft.Column):
                                 ft.Container(
                                     content=self._node_list_col,
                                     width=280,
-                                    border=ft.border.only(right=ft.BorderSide(1, BORDER)),
-                                    padding=ft.padding.only(right=12),
+                                    border=ft.Border.only(right=ft.BorderSide(1, BORDER)),
+                                    padding=ft.Padding.only(right=12),
                                 ),
                                 ft.Container(
                                     content=self._detail_panel,
                                     expand=True,
-                                    padding=ft.padding.only(left=12),
+                                    padding=ft.Padding.only(left=12),
                                 ),
                             ],
                             expand=True,
                             spacing=0,
                         ),
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -111,7 +111,7 @@ class EditorView(ft.Column):
                     icon=ft.icons.ACCOUNT_TREE,
                     content=ft.Container(
                         content=self._diagram_container,
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -120,7 +120,7 @@ class EditorView(ft.Column):
                     icon=ft.icons.CODE,
                     content=ft.Container(
                         content=self._json_container,
-                        padding=ft.padding.only(top=16),
+                        padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
@@ -163,7 +163,7 @@ class EditorView(ft.Column):
             padding=16,
             bgcolor=SURFACE,
             border_radius=12,
-            border=ft.border.all(1, BORDER),
+            border=ft.Border.all(1, BORDER),
         )
 
     def load_workflow(self, workflow_data: dict[str, Any]) -> None:
@@ -262,7 +262,7 @@ class EditorView(ft.Column):
             padding=8,
             border_radius=8,
             bgcolor=ACCENT + "22" if selected else SURFACE2,
-            border=ft.border.all(1, ACCENT if selected else BORDER),
+            border=ft.Border.all(1, ACCENT if selected else BORDER),
             on_click=lambda e, i=idx: self._select_node(i),
             ink=True,
         )
