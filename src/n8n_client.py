@@ -16,6 +16,23 @@ class N8nAPIError(Exception):
         self.status_code = status_code
 
 
+class _WrappedAsyncClient(httpx.AsyncClient):
+    """httpx client that reports transport failures as N8nAPIError.
+
+    Without this, a stopped n8n instance raises httpx.ConnectError straight out
+    of every client method; callers only catch N8nAPIError, so the API server
+    turns a routine "n8n is offline" into a 500.
+    """
+
+    async def send(self, *args: Any, **kwargs: Any) -> httpx.Response:
+        try:
+            return await super().send(*args, **kwargs)
+        except httpx.HTTPError as exc:
+            raise N8nAPIError(
+                f"Cannot reach n8n at {self.base_url}: {exc}"
+            ) from exc
+
+
 class N8nClient:
     def __init__(
         self,
@@ -37,7 +54,7 @@ class N8nClient:
         return headers
 
     def _client(self) -> httpx.AsyncClient:
-        return httpx.AsyncClient(
+        return _WrappedAsyncClient(
             base_url=self.base_url,
             headers=self._headers(),
             timeout=self._timeout,

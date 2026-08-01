@@ -119,6 +119,14 @@ class SettingsUpdateRequest(BaseModel):
     llm_model: str | None = None
     llm_temperature: float | None = None
     default_timezone: str | None = None
+    # Provider API keys — accepted so the Settings page can persist them.
+    openai_api_key: str | None = None
+    anthropic_api_key: str | None = None
+    openrouter_api_key: str | None = None
+    xai_api_key: str | None = None
+    gemini_api_key: str | None = None
+    deepseek_api_key: str | None = None
+    moonshot_api_key: str | None = None
 
 
 class TemplateListItem(BaseModel):

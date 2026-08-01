@@ -1,7 +1,8 @@
 """
 LLM-powered n8n workflow generator.
 
-Supports OpenAI (GPT-4o with JSON mode) and Anthropic (Claude) as providers.
+Supports OpenAI (GPT-4o with JSON mode), Anthropic (Claude), and any
+OpenAI-compatible provider (OpenRouter, Grok/xAI, Gemini, DeepSeek, Kimi/Moonshot).
 Uses structured prompting + validation + auto-fix for reliable JSON output.
 """
 
@@ -12,7 +13,7 @@ from typing import Any
 
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from src.config import settings
+from src.config import LLM_PROVIDERS, settings
 from src.node_templates import build_node_reference_json
 from src.workflow_validator import auto_fix_workflow, validate_workflow
 
@@ -118,7 +119,11 @@ Now generate the workflow JSON for the user's request. Output ONLY the JSON obje
 # ── OpenAI Generator ──────────────────────────────────────────────────────────
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    reraise=True,  # surface the provider's real error, not RetryError[<Future ...>]
+)
 async def _generate_openai(
     prompt: str,
     model: str,
@@ -151,7 +156,11 @@ async def _generate_openai(
 # ── Anthropic Generator ───────────────────────────────────────────────────────
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    reraise=True,  # surface the provider's real error, not RetryError[<Future ...>]
+)
 async def _generate_anthropic(
     prompt: str,
     model: str,
@@ -180,6 +189,51 @@ async def _generate_anthropic(
     tokens = response.usage.input_tokens + response.usage.output_tokens
 
     return json.loads(raw_content), tokens
+
+
+# ── OpenAI-Compatible Generator ───────────────────────────────────────────────
+# OpenRouter, Grok (xAI), Gemini, DeepSeek and Kimi/Moonshot all expose the
+# OpenAI Chat Completions API; they differ only by base_url, key and model.
+# We avoid response_format=json_object here since not every provider supports
+# it, and instead rely on the strict system prompt + text extraction.
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    reraise=True,  # surface the provider's real error, not RetryError[<Future ...>]
+)
+async def _generate_openai_compat(
+    prompt: str,
+    model: str,
+    temperature: float,
+    max_tokens: int,
+    base_url: str,
+    api_key: str,
+) -> tuple[dict[str, Any], int]:
+    from openai import AsyncOpenAI
+
+    client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+
+    user_message = (
+        f"Create an n8n workflow for: {prompt}\n\n"
+        "Output ONLY the JSON object — no markdown, no explanation, no code fences."
+    )
+
+    response = await client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+    )
+
+    raw = response.choices[0].message.content or "{}"
+    raw = _extract_json_from_text(raw)
+    tokens = response.usage.total_tokens if response.usage else 0
+    return json.loads(raw), tokens
 
 
 def _extract_json_from_text(text: str) -> str:
@@ -218,9 +272,31 @@ async def generate_workflow(
     Raises ValueError if generation or validation fails after retries.
     """
     provider = llm_provider or settings.llm_provider
-    model = llm_model or settings.llm_model
+
+    meta = LLM_PROVIDERS.get(provider)
+    if not meta:
+        raise ValueError(f"Unknown LLM provider: '{provider}'")
+
+    # Pick a model: explicit arg wins; else reuse the configured model only when
+    # it belongs to the active provider; otherwise fall back to the provider default.
+    if llm_model:
+        model = llm_model
+    elif provider == settings.llm_provider and settings.llm_model:
+        model = settings.llm_model
+    else:
+        model = meta["default_model"]
+
     temperature = settings.llm_temperature
     max_tokens = settings.llm_max_tokens
+
+    # Fail fast (and clearly) on a missing key rather than burning three
+    # retries on an SDK error nobody can read.
+    api_key = settings.api_key_for(provider)
+    if not api_key:
+        raise ValueError(
+            f"No API key configured for provider '{meta['label']}'. "
+            f"Add it in Settings, or set {meta['key_attr'].upper()} in .env."
+        )
 
     t_start = time.perf_counter()
 
@@ -234,7 +310,9 @@ async def generate_workflow(
                 prompt, model, temperature, max_tokens
             )
         else:
-            raise ValueError(f"Unknown LLM provider: '{provider}'")
+            workflow_json, tokens = await _generate_openai_compat(
+                prompt, model, temperature, max_tokens, meta["base_url"], api_key
+            )
     except json.JSONDecodeError as exc:
         raise ValueError(f"LLM returned invalid JSON: {exc}") from exc
     except Exception as exc:

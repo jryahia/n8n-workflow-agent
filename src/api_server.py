@@ -4,8 +4,9 @@ Provides endpoints for workflow generation, management, and n8n integration.
 """
 
 import time
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, AsyncIterator
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,10 +42,18 @@ from src.templates import BUILTIN_TEMPLATES
 from src.workflow_generator import generate_workflow
 from src.workflow_validator import validate_workflow
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    await init_db()
+    await _seed_builtin_templates()
+    yield
+
+
 app = FastAPI(
     title="n8n Workflow Agent",
     version=settings.app_version,
     description="AI-powered n8n workflow generation and management",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -56,10 +65,28 @@ app.add_middleware(
 )
 
 
-@app.on_event("startup")
-async def startup() -> None:
-    await init_db()
-    await _seed_builtin_templates()
+async def _log_failed_generation(
+    prompt: str,
+    llm_provider: str,
+    llm_model: str,
+    error: str,
+    latency_ms: float,
+) -> None:
+    from src.database import AsyncSessionLocal
+
+    async with AsyncSessionLocal() as session:
+        session.add(
+            PromptLog(
+                prompt=prompt,
+                llm_provider=llm_provider,
+                llm_model=llm_model,
+                tokens_used=0,
+                success=False,
+                error_message=error,
+                latency_ms=latency_ms,
+            )
+        )
+        await session.commit()
 
 
 async def _seed_builtin_templates() -> None:
@@ -114,17 +141,15 @@ async def generate_workflow_endpoint(
             llm_model=request.llm_model,
         )
     except ValueError as exc:
-        # Log failed attempt
-        log = PromptLog(
+        # Log the failed attempt in its own session — raising below rolls `db`
+        # back, which would otherwise discard the log entry we just added.
+        await _log_failed_generation(
             prompt=request.prompt,
             llm_provider=request.llm_provider or settings.llm_provider,
             llm_model=request.llm_model or settings.llm_model,
-            tokens_used=0,
-            success=False,
-            error_message=str(exc),
+            error=str(exc),
             latency_ms=(time.perf_counter() - t_start) * 1000,
         )
-        db.add(log)
         raise HTTPException(status_code=400, detail=str(exc))
 
     workflow_json: dict[str, Any] = result["workflow_json"]
@@ -537,6 +562,14 @@ async def update_settings(request: SettingsUpdateRequest) -> SettingsResponse:
     update_data = request.model_dump(exclude_none=True)
     settings.update(**update_data)
     refresh_client()
+    # Persist to .env so the change survives a restart — update() alone is
+    # in-memory only.
+    try:
+        settings.persist(list(update_data.keys()))
+    except OSError as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Settings applied but could not be saved: {exc}"
+        )
     return SettingsResponse(
         n8n_base_url=settings.n8n_base_url,
         n8n_api_key="***" if settings.n8n_api_key else "",

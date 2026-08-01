@@ -10,6 +10,7 @@ from typing import Any, Callable
 import flet as ft
 import httpx
 
+from src.config import LLM_PROVIDERS
 from src.ui.components import (
     ACCENT,
     BG,
@@ -21,6 +22,7 @@ from src.ui.components import (
     TEXT_MUTED,
     WARNING,
     accent_button,
+    build_tabs,
     connection_diagram,
     divider,
     empty_state,
@@ -72,8 +74,8 @@ class PromptView(ft.Column):
         self._provider_dropdown = ft.Dropdown(
             value="openai",
             options=[
-                ft.dropdown.Option("openai", "GPT-4o (OpenAI)"),
-                ft.dropdown.Option("anthropic", "Claude (Anthropic)"),
+                ft.dropdown.Option(key, meta["label"])
+                for key, meta in LLM_PROVIDERS.items()
             ],
             bgcolor=SURFACE2,
             color=TEXT,
@@ -85,7 +87,7 @@ class PromptView(ft.Column):
         self._generate_btn = accent_button(
             "Generate Workflow",
             on_click=self._on_generate,
-            icon=ft.icons.AUTO_AWESOME,
+            icon=ft.Icons.AUTO_AWESOME,
         )
 
         self._content_area = ft.Column(
@@ -97,14 +99,14 @@ class PromptView(ft.Column):
         self.controls = [
             self._build_input_panel(),
             ft.Container(height=16),
-            ft.Expanded(child=self._content_area),
+            self._content_area,
         ]
 
     def _build_input_panel(self) -> ft.Container:
         examples_row = ft.Row(
             [
                 ft.TextButton(
-                    text=p[:48] + "..." if len(p) > 48 else p,
+                    content=p[:48] + "..." if len(p) > 48 else p,
                     on_click=lambda e, prompt=p: self._use_example(prompt),
                     style=ft.ButtonStyle(
                         color=TEXT_MUTED,
@@ -135,7 +137,7 @@ class PromptView(ft.Column):
                     ft.Row(
                         [
                             self._generate_btn,
-                            ghost_button("Clear", on_click=self._on_clear, icon=ft.icons.CLEAR),
+                            ghost_button("Clear", on_click=self._on_clear, icon=ft.Icons.CLEAR),
                         ],
                         spacing=10,
                     ),
@@ -150,8 +152,8 @@ class PromptView(ft.Column):
             ),
             padding=20,
             bgcolor=SURFACE,
-            border_radius=12,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
 
     def _empty_state(self) -> ft.Container:
@@ -176,7 +178,7 @@ class PromptView(ft.Column):
 
         self._loading = True
         self._generate_btn.disabled = True
-        self._generate_btn.text = "Generating..."
+        self._generate_btn.content = "Generating..."
         self._generate_btn.update()
 
         self._content_area.controls = [loading_spinner("Generating workflow with AI...")]
@@ -209,7 +211,7 @@ class PromptView(ft.Column):
         finally:
             self._loading = False
             self._generate_btn.disabled = False
-            self._generate_btn.text = "Generate Workflow"
+            self._generate_btn.content = "Generate Workflow"
             self._generate_btn.update()
             self._content_area.update()
 
@@ -225,55 +227,52 @@ class PromptView(ft.Column):
         nodes: list[dict[str, Any]] = workflow_json.get("nodes", [])
         json_str = json.dumps(workflow_json, indent=2)
 
-        tabs = ft.Tabs(
-            selected_index=0,
-            animation_duration=200,
-            tabs=[
-                ft.Tab(
-                    text="Overview",
-                    icon=ft.icons.ACCOUNT_TREE,
-                    content=ft.Container(
+        tabs = build_tabs(
+            [
+                (
+                    "Overview",
+                    "account_tree",
+                    ft.Container(
                         content=self._build_overview_tab(workflow_json, nodes),
                         padding=ft.Padding.only(top=16),
                     ),
                 ),
-                ft.Tab(
-                    text="Nodes",
-                    icon=ft.icons.LAYERS,
-                    content=ft.Container(
+                (
+                    "Nodes",
+                    "layers",
+                    ft.Container(
                         content=self._build_nodes_tab(nodes),
                         padding=ft.Padding.only(top=16),
                     ),
                 ),
-                ft.Tab(
-                    text="JSON",
-                    icon=ft.icons.CODE,
-                    content=ft.Container(
+                (
+                    "JSON",
+                    "code",
+                    ft.Container(
                         content=json_text_view(json_str, max_height=500),
                         padding=ft.Padding.only(top=16),
                     ),
                 ),
-            ],
-            expand=True,
+            ]
         )
 
         action_row = ft.Row(
             [
                 accent_button(
                     "Deploy to n8n",
-                    icon=ft.icons.ROCKET_LAUNCH,
+                    icon=ft.Icons.ROCKET_LAUNCH,
                     on_click=lambda e: asyncio.create_task(
                         self._deploy_workflow(data["id"])
                     ),
                 ),
                 ghost_button(
                     "Open in Editor",
-                    icon=ft.icons.EDIT,
+                    icon=ft.Icons.EDIT,
                     on_click=lambda e: self._on_workflow_select(data),
                 ),
                 ghost_button(
                     "Copy JSON",
-                    icon=ft.icons.COPY,
+                    icon=ft.Icons.COPY,
                     on_click=lambda e: self._copy_json(json_str),
                 ),
             ],
@@ -317,8 +316,8 @@ class PromptView(ft.Column):
                     ),
                     padding=20,
                     bgcolor=SURFACE,
-                    border_radius=12,
-                    border=ft.Border.all(1, BORDER),
+                    border_radius=0,
+                    border=ft.Border.all(2, BORDER),
                     expand=True,
                 )
             ],
@@ -336,8 +335,8 @@ class PromptView(ft.Column):
                     content=connection_diagram(workflow),
                     padding=12,
                     bgcolor=SURFACE2,
-                    border_radius=8,
-                    border=ft.Border.all(1, BORDER),
+                    border_radius=0,
+                    border=ft.Border.all(2, BORDER),
                 ),
                 ft.Container(height=16),
                 section_title("Workflow Info", 13),
@@ -360,8 +359,8 @@ class PromptView(ft.Column):
                     ),
                     padding=12,
                     bgcolor=SURFACE2,
-                    border_radius=8,
-                    border=ft.Border.all(1, BORDER),
+                    border_radius=0,
+                    border=ft.Border.all(2, BORDER),
                 ),
             ],
             spacing=0,
@@ -394,8 +393,8 @@ class PromptView(ft.Column):
                         ),
                         padding=12,
                         bgcolor=SURFACE2,
-                        border_radius=8,
-                        border=ft.Border.all(1, ERROR + "44"),
+                        border_radius=0,
+                        border=ft.Border.all(2, ERROR + "44"),
                     ),
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -403,9 +402,9 @@ class PromptView(ft.Column):
             ),
             padding=24,
             bgcolor=SURFACE,
-            border_radius=12,
-            border=ft.Border.all(1, BORDER),
-            alignment=ft.alignment.center,
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
+            alignment=ft.Alignment.CENTER,
         )
 
     async def _deploy_workflow(self, workflow_id: str) -> None:
@@ -424,7 +423,7 @@ class PromptView(ft.Column):
             show_snack(self.page, f"Deploy error: {exc}", error=True)
 
     def _copy_json(self, json_str: str) -> None:
-        self.page.set_clipboard(json_str)
+        self.page.run_task(self.page.clipboard.set, json_str)
         show_snack(self.page, "JSON copied to clipboard!")
 
 

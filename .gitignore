@@ -37,3 +37,9 @@ htmlcov/
 
 # Logs
 *.log
+
+# Database / data files
+*.db
+*.sqlite3
+data/
+chroma/

@@ -189,3 +189,32 @@ def test_n8n_api_error_message() -> None:
     err = N8nAPIError("Test error message", status_code=404)
     assert str(err) == "Test error message"
     assert err.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_unreachable_n8n_raises_n8n_api_error(client: N8nClient) -> None:
+    """A stopped n8n must surface as N8nAPIError, not a raw httpx.ConnectError.
+
+    Callers only catch N8nAPIError, so a leaked transport error turned every
+    n8n endpoint into a 500 whenever the instance was offline.
+    """
+    with patch.object(
+        httpx.AsyncClient,
+        "send",
+        new=AsyncMock(side_effect=httpx.ConnectError("All connection attempts failed")),
+    ):
+        with pytest.raises(N8nAPIError, match="Cannot reach n8n"):
+            await client.list_workflows()
+
+        with pytest.raises(N8nAPIError, match="Cannot reach n8n"):
+            await client.create_workflow({"name": "x", "nodes": [], "connections": {}})
+
+
+@pytest.mark.asyncio
+async def test_health_check_false_when_unreachable(client: N8nClient) -> None:
+    with patch.object(
+        httpx.AsyncClient,
+        "send",
+        new=AsyncMock(side_effect=httpx.ConnectError("nope")),
+    ):
+        assert await client.health_check() is False

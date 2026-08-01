@@ -21,6 +21,7 @@ from src.ui.components import (
     TEXT_MUTED,
     WARNING,
     accent_button,
+    build_tabs,
     danger_button,
     divider,
     empty_state,
@@ -46,7 +47,7 @@ class LibraryView(ft.Column):
 
         self._search_field = ft.TextField(
             hint_text="Search workflows...",
-            prefix_icon=ft.icons.SEARCH,
+            prefix_icon=ft.Icons.SEARCH,
             border_color=BORDER,
             focused_border_color=ACCENT,
             bgcolor=SURFACE2,
@@ -65,46 +66,43 @@ class LibraryView(ft.Column):
         self._workflows_col = ft.Column(spacing=8, scroll=ft.ScrollMode.AUTO, expand=True)
         self._templates_col = ft.Column(spacing=8, scroll=ft.ScrollMode.AUTO, expand=True)
 
-        self._tabs = ft.Tabs(
-            selected_index=0,
-            animation_duration=200,
-            on_change=self._on_tab_change,
-            tabs=[
-                ft.Tab(
-                    text="Generated",
-                    icon=ft.icons.AUTO_AWESOME,
-                    content=ft.Container(
+        self._tabs = build_tabs(
+            [
+                (
+                    "Generated",
+                    "auto_awesome",
+                    ft.Container(
                         content=self._workflows_col,
                         padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
-                ft.Tab(
-                    text="Templates",
-                    icon=ft.icons.BOOKMARK,
-                    content=ft.Container(
+                (
+                    "Templates",
+                    "bookmark",
+                    ft.Container(
                         content=self._templates_col,
                         padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
-                ft.Tab(
-                    text="Import",
-                    icon=ft.icons.UPLOAD_FILE,
-                    content=ft.Container(
+                (
+                    "Import",
+                    "upload_file",
+                    ft.Container(
                         content=self._build_import_panel(),
                         padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
             ],
-            expand=True,
+            on_change=self._on_tab_change,
         )
 
         self.controls = [
             self._build_header(),
             ft.Container(height=12),
-            ft.Expanded(child=self._tabs),
+            self._tabs,
         ]
 
     def _build_header(self) -> ft.Container:
@@ -115,7 +113,7 @@ class LibraryView(ft.Column):
                     ft.Container(width=8),
                     accent_button(
                         "Refresh",
-                        icon=ft.icons.REFRESH,
+                        icon=ft.Icons.REFRESH,
                         on_click=lambda e: asyncio.create_task(self._load_all()),
                     ),
                 ],
@@ -123,8 +121,8 @@ class LibraryView(ft.Column):
             ),
             padding=16,
             bgcolor=SURFACE,
-            border_radius=12,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
 
     def _build_import_panel(self) -> ft.Container:
@@ -138,7 +136,7 @@ class LibraryView(ft.Column):
             bgcolor=SURFACE2,
             color=TEXT,
             text_size=12,
-            font_family="monospace",
+            text_style=ft.TextStyle(font_family="monospace"),
             expand=True,
         )
         self._import_name = ft.TextField(
@@ -166,10 +164,10 @@ class LibraryView(ft.Column):
                         [
                             accent_button(
                                 "Import Workflow",
-                                icon=ft.icons.UPLOAD,
+                                icon=ft.Icons.UPLOAD,
                                 on_click=lambda e: asyncio.create_task(self._import_workflow()),
                             ),
-                            ghost_button("Clear", on_click=self._clear_import, icon=ft.icons.CLEAR),
+                            ghost_button("Clear", on_click=self._clear_import, icon=ft.Icons.CLEAR),
                         ],
                         spacing=8,
                     ),
@@ -274,7 +272,7 @@ class LibraryView(ft.Column):
                                     color=SUCCESS if deployed else TEXT_MUTED,
                                 ),
                                 padding=ft.Padding.symmetric(horizontal=8, vertical=3),
-                                border_radius=10,
+                                border_radius=0,
                                 bgcolor=(SUCCESS + "22") if deployed else SURFACE,
                             ),
                         ],
@@ -294,28 +292,28 @@ class LibraryView(ft.Column):
                             ft.Container(expand=True),
                             ghost_button(
                                 "Edit",
-                                icon=ft.icons.EDIT,
+                                icon=ft.Icons.EDIT,
                                 on_click=lambda e, id=wf_id: asyncio.create_task(
                                     self._open_in_editor(id)
                                 ),
                             ),
                             ghost_button(
                                 "Deploy",
-                                icon=ft.icons.ROCKET_LAUNCH,
+                                icon=ft.Icons.ROCKET_LAUNCH,
                                 on_click=lambda e, id=wf_id: asyncio.create_task(
                                     self._deploy_workflow(id)
                                 ),
                             ),
                             ghost_button(
                                 "Export",
-                                icon=ft.icons.DOWNLOAD,
+                                icon=ft.Icons.DOWNLOAD,
                                 on_click=lambda e, id=wf_id: asyncio.create_task(
                                     self._export_workflow(id, name)
                                 ),
                             ),
                             danger_button(
                                 "Delete",
-                                icon=ft.icons.DELETE,
+                                icon=ft.Icons.DELETE,
                                 on_click=lambda e, id=wf_id: asyncio.create_task(
                                     self._delete_workflow(id)
                                 ),
@@ -328,8 +326,8 @@ class LibraryView(ft.Column):
             ),
             padding=14,
             bgcolor=SURFACE,
-            border_radius=10,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
 
     def _render_templates(self) -> None:
@@ -370,7 +368,7 @@ class LibraryView(ft.Column):
                             ft.Container(
                                 content=ft.Text(category, size=11, color=ACCENT),
                                 padding=ft.Padding.symmetric(horizontal=8, vertical=3),
-                                border_radius=10,
+                                border_radius=0,
                                 bgcolor=ACCENT + "22",
                             ),
                         ]
@@ -384,7 +382,7 @@ class LibraryView(ft.Column):
                             ft.Container(expand=True),
                             accent_button(
                                 "Use Template",
-                                icon=ft.icons.PLAY_ARROW,
+                                icon=ft.Icons.PLAY_ARROW,
                                 on_click=lambda e, id=tpl_id: asyncio.create_task(
                                     self._use_template(id)
                                 ),
@@ -396,8 +394,8 @@ class LibraryView(ft.Column):
             ),
             padding=14,
             bgcolor=SURFACE,
-            border_radius=10,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
 
     def _on_search_change(self, e: ft.ControlEvent) -> None:

@@ -16,6 +16,18 @@ from src.workflow_generator import (
 from src.workflow_validator import validate_workflow
 
 
+@pytest.fixture
+def openai_key():
+    """generate_workflow refuses to call a provider with no key configured,
+    so mocked-LLM tests must supply one."""
+    from src.config import settings
+
+    original = settings.openai_api_key
+    settings.update(openai_api_key="sk-test-key")
+    yield
+    object.__setattr__(settings, "openai_api_key", original)
+
+
 def test_derive_name_short_prompt():
     result = _derive_name_from_prompt("send email every day")
     assert "Send" in result or "send" in result.lower()
@@ -72,7 +84,7 @@ def test_build_minimal_workflow_unique_version_id():
 
 
 @pytest.mark.asyncio
-async def test_generate_workflow_openai_mocked():
+async def test_generate_workflow_openai_mocked(openai_key):
     """Test generate_workflow with a mocked OpenAI response."""
     import json
     from src.workflow_generator import generate_workflow
@@ -154,7 +166,7 @@ async def test_generate_workflow_openai_mocked():
 
 
 @pytest.mark.asyncio
-async def test_generate_workflow_validation_failure():
+async def test_generate_workflow_validation_failure(openai_key):
     """Test that invalid LLM output raises ValueError."""
     from src.workflow_generator import generate_workflow
 
@@ -164,8 +176,32 @@ async def test_generate_workflow_validation_failure():
         "src.workflow_generator._generate_openai",
         new=AsyncMock(return_value=(bad_workflow, 100)),
     ):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="validation"):
             await generate_workflow("some prompt", llm_provider="openai")
+
+
+@pytest.mark.asyncio
+async def test_generate_workflow_without_api_key_fails_fast():
+    """A missing key must produce a readable error, not a wrapped SDK failure."""
+    from src.config import settings
+    from src.workflow_generator import generate_workflow
+
+    original = settings.openai_api_key
+    settings.update(openai_api_key="")
+    object.__setattr__(settings, "openai_api_key", "")
+    try:
+        with pytest.raises(ValueError, match="No API key configured"):
+            await generate_workflow("some prompt", llm_provider="openai")
+    finally:
+        object.__setattr__(settings, "openai_api_key", original)
+
+
+@pytest.mark.asyncio
+async def test_generate_workflow_unknown_provider():
+    from src.workflow_generator import generate_workflow
+
+    with pytest.raises(ValueError, match="Unknown LLM provider"):
+        await generate_workflow("some prompt", llm_provider="not-a-provider")
 
 
 def test_node_templates_reference_is_valid_json():

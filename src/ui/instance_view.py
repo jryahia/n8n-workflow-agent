@@ -20,6 +20,7 @@ from src.ui.components import (
     TEXT_MUTED,
     WARNING,
     accent_button,
+    build_tabs,
     danger_button,
     divider,
     empty_state,
@@ -43,49 +44,46 @@ class InstanceView(ft.Column):
         self._connection_indicator = ft.Container(
             content=ft.Row(
                 [
-                    ft.Container(width=10, height=10, border_radius=5, bgcolor=TEXT_MUTED),
+                    ft.Container(width=10, height=10, border_radius=0, bgcolor=TEXT_MUTED),
                     ft.Text("Not connected", size=13, color=TEXT_MUTED),
                 ],
                 spacing=6,
                 tight=True,
             ),
             padding=ft.Padding.symmetric(horizontal=10, vertical=6),
-            border_radius=20,
+            border_radius=0,
             bgcolor=SURFACE2,
         )
 
         self._workflows_col = ft.Column(spacing=8, scroll=ft.ScrollMode.AUTO, expand=True)
         self._creds_col = ft.Column(spacing=6, scroll=ft.ScrollMode.AUTO)
 
-        self._tabs = ft.Tabs(
-            selected_index=0,
-            animation_duration=200,
-            tabs=[
-                ft.Tab(
-                    text="Workflows",
-                    icon=ft.icons.ACCOUNT_TREE,
-                    content=ft.Container(
+        self._tabs = build_tabs(
+            [
+                (
+                    "Workflows",
+                    "account_tree",
+                    ft.Container(
                         content=self._workflows_col,
                         padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
-                ft.Tab(
-                    text="Credentials",
-                    icon=ft.icons.VPN_KEY,
-                    content=ft.Container(
+                (
+                    "Credentials",
+                    "vpn_key",
+                    ft.Container(
                         content=self._creds_col,
                         padding=ft.Padding.only(top=16),
                     ),
                 ),
-            ],
-            expand=True,
+            ]
         )
 
         self.controls = [
             self._build_header(),
             ft.Container(height=12),
-            ft.Expanded(child=self._tabs),
+            self._tabs,
         ]
 
     def _build_header(self) -> ft.Container:
@@ -96,12 +94,12 @@ class InstanceView(ft.Column):
                     ft.Container(expand=True),
                     accent_button(
                         "Check Connection",
-                        icon=ft.icons.WIFI,
+                        icon=ft.Icons.WIFI,
                         on_click=lambda e: asyncio.create_task(self._check_connection()),
                     ),
                     ghost_button(
                         "Refresh",
-                        icon=ft.icons.REFRESH,
+                        icon=ft.Icons.REFRESH,
                         on_click=lambda e: asyncio.create_task(self._load_all()),
                     ),
                 ],
@@ -109,8 +107,8 @@ class InstanceView(ft.Column):
             ),
             padding=16,
             bgcolor=SURFACE,
-            border_radius=12,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
 
     def did_mount(self) -> None:
@@ -161,7 +159,7 @@ class InstanceView(ft.Column):
 
         self._connection_indicator.content = ft.Row(
             [
-                ft.Container(width=10, height=10, border_radius=5, bgcolor=color),
+                ft.Container(width=10, height=10, border_radius=0, bgcolor=color),
                 ft.Text(label, size=13, color=color),
             ],
             spacing=6,
@@ -258,7 +256,7 @@ class InstanceView(ft.Column):
                             (
                                 ghost_button(
                                     "Deactivate",
-                                    icon=ft.icons.PAUSE,
+                                    icon=ft.Icons.PAUSE,
                                     on_click=lambda e, id=wf_id: asyncio.create_task(
                                         self._deactivate(id)
                                     ),
@@ -267,7 +265,7 @@ class InstanceView(ft.Column):
                                 if active
                                 else ghost_button(
                                     "Activate",
-                                    icon=ft.icons.PLAY_ARROW,
+                                    icon=ft.Icons.PLAY_ARROW,
                                     on_click=lambda e, id=wf_id: asyncio.create_task(
                                         self._activate(id)
                                     ),
@@ -276,7 +274,7 @@ class InstanceView(ft.Column):
                             ),
                             danger_button(
                                 "Delete",
-                                icon=ft.icons.DELETE,
+                                icon=ft.Icons.DELETE,
                                 on_click=lambda e, id=wf_id: asyncio.create_task(
                                     self._delete_workflow(id)
                                 ),
@@ -289,30 +287,19 @@ class InstanceView(ft.Column):
             ),
             padding=14,
             bgcolor=SURFACE,
-            border_radius=10,
+            border_radius=0,
             border=ft.Border.all(
                 1, SUCCESS + "66" if active else BORDER
             ),
         )
 
     async def _activate(self, workflow_id: str) -> None:
+        # These ids come from n8n itself, so talk to n8n directly — the local
+        # /workflows/{id}/activate endpoint keys off our own workflow ids.
         try:
-            async with httpx.AsyncClient(timeout=15) as client:
-                response = await client.post(
-                    f"{self._api_base}/n8n/workflows/{workflow_id}/activate"
-                    if False  # use the n8n client directly
-                    else f"{self._api_base}/workflows/{workflow_id}/activate"
-                )
-            # Try direct n8n endpoint if local endpoint fails
-            if response.status_code in (404, 400):
-                from src.n8n_client import N8nClient
-                client_n8n = N8nClient()
-                await client_n8n.activate_workflow(workflow_id)
-                show_snack(self.page, "Workflow activated")
-            elif response.status_code == 200:
-                show_snack(self.page, "Workflow activated")
-            else:
-                show_snack(self.page, "Activation failed", error=True)
+            from src.n8n_client import N8nClient
+            await N8nClient().activate_workflow(workflow_id)
+            show_snack(self.page, "Workflow activated")
             await self._load_workflows()
         except Exception as exc:
             show_snack(self.page, f"Error: {exc}", error=True)
@@ -379,8 +366,8 @@ class InstanceView(ft.Column):
                     ),
                     padding=10,
                     bgcolor=SURFACE2,
-                    border_radius=8,
-                    border=ft.Border.all(1, BORDER),
+                    border_radius=0,
+                    border=ft.Border.all(2, BORDER),
                 )
             )
 

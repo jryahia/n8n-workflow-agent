@@ -21,6 +21,7 @@ from src.ui.components import (
     TEXT_MUTED,
     WARNING,
     accent_button,
+    build_tabs,
     connection_diagram,
     danger_button,
     divider,
@@ -56,14 +57,14 @@ class EditorView(ft.Column):
             content=muted_text("Load a workflow to see the connection diagram"),
             padding=12,
             bgcolor=SURFACE2,
-            border_radius=8,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
         self._json_container = ft.Container(
             content=muted_text("No workflow loaded"),
             padding=12,
-            bgcolor="#0d1117",
-            border_radius=8,
+            bgcolor="#0d0d0d",
+            border_radius=0,
             height=400,
         )
         self._name_field = ft.TextField(
@@ -77,20 +78,18 @@ class EditorView(ft.Column):
         )
         self._status_text = muted_text("No workflow loaded")
 
-        self._tabs = ft.Tabs(
-            selected_index=0,
-            animation_duration=200,
-            tabs=[
-                ft.Tab(
-                    text="Nodes",
-                    icon=ft.icons.LAYERS,
-                    content=ft.Container(
+        self._tabs = build_tabs(
+            [
+                (
+                    "Nodes",
+                    "layers",
+                    ft.Container(
                         content=ft.Row(
                             [
                                 ft.Container(
                                     content=self._node_list_col,
                                     width=280,
-                                    border=ft.Border.only(right=ft.BorderSide(1, BORDER)),
+                                    border=ft.Border.only(right=ft.BorderSide(2, BORDER)),
                                     padding=ft.Padding.only(right=12),
                                 ),
                                 ft.Container(
@@ -106,32 +105,31 @@ class EditorView(ft.Column):
                         expand=True,
                     ),
                 ),
-                ft.Tab(
-                    text="Diagram",
-                    icon=ft.icons.ACCOUNT_TREE,
-                    content=ft.Container(
+                (
+                    "Diagram",
+                    "account_tree",
+                    ft.Container(
                         content=self._diagram_container,
                         padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
-                ft.Tab(
-                    text="JSON",
-                    icon=ft.icons.CODE,
-                    content=ft.Container(
+                (
+                    "JSON",
+                    "code",
+                    ft.Container(
                         content=self._json_container,
                         padding=ft.Padding.only(top=16),
                         expand=True,
                     ),
                 ),
-            ],
-            expand=True,
+            ]
         )
 
         self.controls = [
             self._build_toolbar(),
             ft.Container(height=12),
-            ft.Expanded(child=self._tabs),
+            self._tabs,
         ]
 
     def _build_toolbar(self) -> ft.Container:
@@ -142,17 +140,17 @@ class EditorView(ft.Column):
                     ft.Container(width=12),
                     accent_button(
                         "Save",
-                        icon=ft.icons.SAVE,
+                        icon=ft.Icons.SAVE,
                         on_click=lambda e: asyncio.create_task(self._save_workflow()),
                     ),
                     ghost_button(
                         "Deploy",
-                        icon=ft.icons.ROCKET_LAUNCH,
+                        icon=ft.Icons.ROCKET_LAUNCH,
                         on_click=lambda e: asyncio.create_task(self._deploy_workflow()),
                     ),
                     ghost_button(
                         "Copy JSON",
-                        icon=ft.icons.COPY,
+                        icon=ft.Icons.COPY,
                         on_click=self._copy_json,
                     ),
                     ft.Container(expand=True),
@@ -162,8 +160,8 @@ class EditorView(ft.Column):
             ),
             padding=16,
             bgcolor=SURFACE,
-            border_radius=12,
-            border=ft.Border.all(1, BORDER),
+            border_radius=0,
+            border=ft.Border.all(2, BORDER),
         )
 
     def load_workflow(self, workflow_data: dict[str, Any]) -> None:
@@ -196,8 +194,8 @@ class EditorView(ft.Column):
         nodes: list[dict[str, Any]] = self._workflow.get("nodes", []) if self._workflow else []
 
         add_btn = ft.TextButton(
-            text="+ Add Node",
-            icon=ft.icons.ADD,
+            content="+ Add Node",
+            icon=ft.Icons.ADD,
             on_click=self._show_add_node_dialog,
             style=ft.ButtonStyle(color=ACCENT),
         )
@@ -230,9 +228,9 @@ class EditorView(ft.Column):
                         content=ft.Text(icon, size=16),
                         width=28,
                         height=28,
-                        border_radius=5,
+                        border_radius=0,
                         bgcolor=color + "33",
-                        alignment=ft.alignment.center,
+                        alignment=ft.Alignment.CENTER,
                     ),
                     ft.Column(
                         [
@@ -249,7 +247,7 @@ class EditorView(ft.Column):
                         expand=True,
                     ),
                     ft.IconButton(
-                        icon=ft.icons.DELETE_OUTLINE,
+                        icon=ft.Icons.DELETE_OUTLINE,
                         icon_size=14,
                         icon_color=TEXT_MUTED,
                         on_click=lambda e, i=idx: self._remove_node(i),
@@ -260,9 +258,9 @@ class EditorView(ft.Column):
                 tight=True,
             ),
             padding=8,
-            border_radius=8,
+            border_radius=0,
             bgcolor=ACCENT + "22" if selected else SURFACE2,
-            border=ft.Border.all(1, ACCENT if selected else BORDER),
+            border=ft.Border.all(2, ACCENT if selected else BORDER),
             on_click=lambda e, i=idx: self._select_node(i),
             ink=True,
         )
@@ -297,7 +295,7 @@ class EditorView(ft.Column):
             bgcolor=SURFACE2,
             color=TEXT,
             text_size=12,
-            font_family="monospace",
+            text_style=ft.TextStyle(font_family="monospace"),
         )
 
         def save_node_changes(e: ft.ControlEvent) -> None:
@@ -345,7 +343,7 @@ class EditorView(ft.Column):
             ft.Container(height=8),
             params_field,
             ft.Container(height=12),
-            accent_button("Apply Changes", on_click=save_node_changes, icon=ft.icons.CHECK),
+            accent_button("Apply Changes", on_click=save_node_changes, icon=ft.Icons.CHECK),
         ]
         try:
             self._detail_panel.update()
@@ -424,8 +422,7 @@ class EditorView(ft.Column):
             self._workflow["nodes"] = nodes
             self._dirty = True
             self._refresh_all()
-            dlg.open = False
-            self.page.update()
+            self.page.pop_dialog()
             show_snack(self.page, f"Added node '{new_node['name']}'")
 
         dlg = ft.AlertDialog(
@@ -437,12 +434,10 @@ class EditorView(ft.Column):
             ),
             actions=[
                 accent_button("Add", on_click=do_add),
-                ghost_button("Cancel", on_click=lambda e: setattr(dlg, "open", False) or self.page.update()),
+                ghost_button("Cancel", on_click=lambda e: self.page.pop_dialog()),
             ],
         )
-        self.page.dialog = dlg
-        dlg.open = True
-        self.page.update()
+        self.page.show_dialog(dlg)
 
     def _refresh_diagram(self) -> None:
         if self._workflow:
@@ -473,7 +468,9 @@ class EditorView(ft.Column):
 
     def _copy_json(self, e: ft.ControlEvent) -> None:
         if self._workflow:
-            self.page.set_clipboard(json.dumps(self._workflow, indent=2))
+            self.page.run_task(
+                self.page.clipboard.set, json.dumps(self._workflow, indent=2)
+            )
             show_snack(self.page, "JSON copied to clipboard!")
 
     async def _save_workflow(self) -> None:

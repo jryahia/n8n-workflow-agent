@@ -47,6 +47,23 @@ def start_api_server(host: str, port: int) -> None:
     asyncio.run(server.serve())
 
 
+def _wait_for_api(host: str, port: int, timeout: float = 15.0) -> bool:
+    """Poll /health until the API answers. A fixed sleep races on slow starts."""
+    import urllib.error
+    import urllib.request
+
+    deadline = time.monotonic() + timeout
+    url = f"http://{host}:{port}/health"
+    while time.monotonic() < deadline:
+        try:
+            with urllib.request.urlopen(url, timeout=1) as response:
+                if response.status == 200:
+                    return True
+        except (urllib.error.URLError, OSError):
+            time.sleep(0.25)
+    return False
+
+
 def main() -> None:
     args = _parse_args()
 
@@ -69,12 +86,15 @@ def main() -> None:
     )
     api_thread.start()
 
-    # Give the server a moment to start
-    time.sleep(1.5)
+    if not _wait_for_api(host, port):
+        print(
+            f"Warning: API server did not respond on http://{host}:{port} — "
+            "the UI will start but every request will fail."
+        )
 
     print(f"n8n Workflow Agent starting — API: http://{host}:{port}")
 
-    # Launch Flet desktop app in main thread
+    # Launch Flet WEB app (opens in the browser) in the main thread
     from src.ui.app import run_flet_app
 
     run_flet_app()

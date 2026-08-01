@@ -25,7 +25,7 @@ from src.ui.components import (
     show_snack,
     theme_container,
 )
-from src.config import settings
+from src.config import LLM_PROVIDERS, settings
 
 
 class SettingsView(ft.Column):
@@ -61,14 +61,14 @@ class SettingsView(ft.Column):
             label="LLM Provider",
             value=settings.llm_provider,
             options=[
-                ft.dropdown.Option("openai", "OpenAI"),
-                ft.dropdown.Option("anthropic", "Anthropic"),
+                ft.dropdown.Option(key, meta["label"])
+                for key, meta in LLM_PROVIDERS.items()
             ],
             bgcolor=SURFACE2,
             color=TEXT,
             border_color=BORDER,
             focused_border_color=ACCENT,
-            on_change=self._on_provider_change,
+            on_select=self._on_provider_change,
         )
         self._llm_model = ft.TextField(
             label="LLM Model",
@@ -106,6 +106,25 @@ class SettingsView(ft.Column):
             text_size=13,
             expand=True,
         )
+        # API-key fields for the OpenAI-compatible providers, built from the
+        # registry so adding a provider in config.py surfaces it here too.
+        self._provider_key_fields: dict[str, ft.TextField] = {}
+        for key, meta in LLM_PROVIDERS.items():
+            if key in ("openai", "anthropic"):
+                continue  # dedicated fields above
+            self._provider_key_fields[meta["key_attr"]] = ft.TextField(
+                label=f"{meta['label']} API Key",
+                value=getattr(settings, meta["key_attr"], ""),
+                hint_text="sk-...",
+                password=True,
+                can_reveal_password=True,
+                border_color=BORDER,
+                focused_border_color=ACCENT,
+                bgcolor=SURFACE2,
+                color=TEXT,
+                text_size=13,
+                expand=True,
+            )
         self._temperature = ft.Slider(
             min=0.0,
             max=1.0,
@@ -152,7 +171,7 @@ class SettingsView(ft.Column):
                                 ft.Container(expand=True),
                                 ghost_button(
                                     "Test Connection",
-                                    icon=ft.icons.WIFI,
+                                    icon=ft.Icons.WIFI,
                                     on_click=lambda e: asyncio.create_task(
                                         self._test_n8n_connection()
                                     ),
@@ -169,8 +188,8 @@ class SettingsView(ft.Column):
                 ),
                 padding=20,
                 bgcolor=SURFACE,
-                border_radius=12,
-                border=ft.Border.all(1, BORDER),
+                border_radius=0,
+                border=ft.Border.all(2, BORDER),
             ),
             # LLM Configuration
             ft.Container(
@@ -196,8 +215,8 @@ class SettingsView(ft.Column):
                 ),
                 padding=20,
                 bgcolor=SURFACE,
-                border_radius=12,
-                border=ft.Border.all(1, BORDER),
+                border_radius=0,
+                border=ft.Border.all(2, BORDER),
             ),
             # API Keys
             ft.Container(
@@ -208,13 +227,18 @@ class SettingsView(ft.Column):
                         self._openai_key,
                         ft.Container(height=8),
                         self._anthropic_key,
+                        *[
+                            ctrl
+                            for field in self._provider_key_fields.values()
+                            for ctrl in (ft.Container(height=8), field)
+                        ],
                     ],
                     spacing=4,
                 ),
                 padding=20,
                 bgcolor=SURFACE,
-                border_radius=12,
-                border=ft.Border.all(1, BORDER),
+                border_radius=0,
+                border=ft.Border.all(2, BORDER),
             ),
             # Preferences
             ft.Container(
@@ -228,8 +252,8 @@ class SettingsView(ft.Column):
                 ),
                 padding=20,
                 bgcolor=SURFACE,
-                border_radius=12,
-                border=ft.Border.all(1, BORDER),
+                border_radius=0,
+                border=ft.Border.all(2, BORDER),
             ),
             # Save Button
             ft.Container(
@@ -237,14 +261,14 @@ class SettingsView(ft.Column):
                     [
                         accent_button(
                             "Save Settings",
-                            icon=ft.icons.SAVE,
+                            icon=ft.Icons.SAVE,
                             on_click=lambda e: asyncio.create_task(self._save_settings()),
                             width=180,
                         ),
                         ghost_button(
                             "Reset to Defaults",
                             on_click=self._reset_defaults,
-                            icon=ft.icons.RESTORE,
+                            icon=ft.Icons.RESTORE,
                         ),
                     ],
                     spacing=12,
@@ -265,7 +289,7 @@ class SettingsView(ft.Column):
                         ),
                         ft.Container(height=8),
                         ft.TextButton(
-                            text="GitHub: n8n Workflow Agent",
+                            content="GitHub: n8n Workflow Agent",
                             url="https://github.com",
                             style=ft.ButtonStyle(color=ACCENT),
                         ),
@@ -274,17 +298,16 @@ class SettingsView(ft.Column):
                 ),
                 padding=20,
                 bgcolor=SURFACE,
-                border_radius=12,
-                border=ft.Border.all(1, BORDER),
+                border_radius=0,
+                border=ft.Border.all(2, BORDER),
             ),
         ]
 
     def _on_provider_change(self, e: ft.ControlEvent) -> None:
-        provider = self._llm_provider.value
-        if provider == "openai":
-            self._llm_model.value = "gpt-4o"
-        elif provider == "anthropic":
-            self._llm_model.value = "claude-3-5-sonnet-20241022"
+        provider = self._llm_provider.value or "openai"
+        meta = LLM_PROVIDERS.get(provider)
+        if meta:
+            self._llm_model.value = meta["default_model"]
         self._llm_model.update()
 
     async def _test_n8n_connection(self) -> None:
@@ -325,23 +348,40 @@ class SettingsView(ft.Column):
             "default_timezone": self._timezone.value or "UTC",
         }
 
-        # Update settings object directly (in-process)
+        # Provider keys go in the same payload so the server writes them to
+        # .env too — only non-empty ones, so a blank field never wipes a key.
+        if self._openai_key.value:
+            update_data["openai_api_key"] = self._openai_key.value
+        if self._anthropic_key.value:
+            update_data["anthropic_api_key"] = self._anthropic_key.value
+        for key_attr, field in self._provider_key_fields.items():
+            if field.value:
+                update_data[key_attr] = field.value
+
+        # Apply in-process immediately so the UI is consistent even if the API
+        # call fails; the API call is what persists them to .env.
         settings.update(**update_data)
 
-        # Also push openai/anthropic key directly (not exposed via REST for security)
-        if self._openai_key.value:
-            settings.update(openai_api_key=self._openai_key.value)
-        if self._anthropic_key.value:
-            settings.update(anthropic_api_key=self._anthropic_key.value)
-
-        # Try to update via API
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                await client.put(f"{self._api_base}/settings", json=update_data)
-        except Exception:
-            pass  # Best-effort; in-process update already done
-
-        show_snack(self.page, "Settings saved!")
+                response = await client.put(
+                    f"{self._api_base}/settings", json=update_data
+                )
+            if response.status_code == 200:
+                show_snack(self.page, "Settings saved to .env!")
+            else:
+                detail = response.json().get("detail", response.text)
+                show_snack(
+                    self.page,
+                    f"Applied for this session, but not saved: {detail}",
+                    error=True,
+                )
+        except Exception as exc:
+            show_snack(
+                self.page,
+                f"Applied for this session, but not saved: {exc}",
+                error=True,
+            )
 
     def _reset_defaults(self, e: ft.ControlEvent) -> None:
         self._n8n_url.value = "http://localhost:5678"

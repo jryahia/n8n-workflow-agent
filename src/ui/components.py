@@ -7,25 +7,40 @@ from typing import Any
 
 import flet as ft
 
-# ── Theme Palette ─────────────────────────────────────────────────────────────
-BG = "#0f1117"
-SURFACE = "#1a1d27"
-SURFACE2 = "#21263a"
-ACCENT = "#4f8cff"
-ACCENT2 = "#7eb3ff"
-SUCCESS = "#2ecc71"
-WARNING = "#f39c12"
-ERROR = "#e74c3c"
-TEXT = "#e8eaf0"
-TEXT_MUTED = "#6b7280"
-BORDER = "#2d3250"
+# ── Theme Palette — Black & White "Minecraft" ─────────────────────────────────
+# Monochrome greys with stark black block-outlines. Status colours (green/amber/
+# red) are kept for usability but everything else is greyscale.
+BG = "#181818"        # coal / void background
+SURFACE = "#262626"   # stone panel
+SURFACE2 = "#333333"  # raised stone
+ACCENT = "#e8e8e8"    # near-white highlight (used for selections/links)
+ACCENT2 = "#ffffff"
+SUCCESS = "#5fa951"   # subtle grass green (kept for status only)
+WARNING = "#c9a227"   # amber (kept for status only)
+ERROR = "#b0413e"     # redstone red (kept for status only)
+TEXT = "#f5f5f5"      # bright white text
+TEXT_MUTED = "#8a8a8a"  # muted grey
+BORDER = "#000000"    # black pixel block-outline
 
-# ── JSON Syntax Colors ────────────────────────────────────────────────────────
-JSON_KEY = "#7ec8e3"
-JSON_STRING = "#98c379"
-JSON_NUMBER = "#e5c07b"
-JSON_BOOL = "#c678dd"
-JSON_NULL = "#c678dd"
+# ── Fonts ─────────────────────────────────────────────────────────────────────
+# Pixel font for titles/buttons/nav; monospace for body (readability).
+FONT_PIXEL = "pixel"
+FONT_MONO = "monospace"
+# Downloaded at runtime by the web app (see app.py page.fonts).
+PIXEL_FONT_URL = (
+    "https://raw.githubusercontent.com/google/fonts/main/ofl/"
+    "pressstart2p/PressStart2P-Regular.ttf"
+)
+
+# Blocky look: zero corner radius everywhere.
+RADIUS = 0
+
+# ── JSON Syntax Colors (greyscale) ────────────────────────────────────────────
+JSON_KEY = "#ffffff"
+JSON_STRING = "#c8c8c8"
+JSON_NUMBER = "#e0e0e0"
+JSON_BOOL = "#a8a8a8"
+JSON_NULL = "#787878"
 
 # ── Node Type Icons ───────────────────────────────────────────────────────────
 NODE_TYPE_ICONS: dict[str, str] = {
@@ -80,7 +95,8 @@ def get_node_icon(node_type: str) -> str:
 
 
 def get_node_color(node_type: str) -> str:
-    return NODE_TYPE_COLORS.get(node_type, ACCENT)
+    # B&W theme: node chips/borders are monochrome grey regardless of type.
+    return "#9a9a9a"
 
 
 # ── Reusable Components ───────────────────────────────────────────────────────
@@ -88,7 +104,7 @@ def get_node_color(node_type: str) -> str:
 def theme_container(
     content: ft.Control,
     padding: int = 16,
-    border_radius: int = 8,
+    border_radius: int = RADIUS,
     bgcolor: str = SURFACE,
     border_color: str = BORDER,
 ) -> ft.Container:
@@ -97,7 +113,7 @@ def theme_container(
         padding=padding,
         border_radius=border_radius,
         bgcolor=bgcolor,
-        border=ft.Border.all(1, border_color),
+        border=ft.Border.all(2, border_color),
     )
 
 
@@ -106,17 +122,19 @@ def accent_button(
     on_click: Any = None,
     icon: str | None = None,
     width: int | None = None,
-) -> ft.ElevatedButton:
-    return ft.ElevatedButton(
-        text=text,
+) -> ft.Button:
+    """Primary 'stone block' button — grey fill, black outline, pixel font."""
+    return ft.Button(
+        content=ft.Text(text, size=11, color=TEXT, font_family=FONT_PIXEL),
         icon=icon,
         on_click=on_click,
         width=width,
         style=ft.ButtonStyle(
-            bgcolor=ACCENT,
-            color=ft.Colors.WHITE,
-            shape=ft.RoundedRectangleBorder(radius=6),
-            padding=ft.Padding.symmetric(horizontal=16, vertical=10),
+            bgcolor=SURFACE2,
+            color=TEXT,
+            side=ft.BorderSide(2, BORDER),
+            shape=ft.RoundedRectangleBorder(radius=RADIUS),
+            padding=ft.Padding.symmetric(horizontal=16, vertical=14),
         ),
     )
 
@@ -128,10 +146,13 @@ def ghost_button(
     color: str = TEXT_MUTED,
 ) -> ft.TextButton:
     return ft.TextButton(
-        text=text,
+        content=ft.Text(text, size=10, color=color, font_family=FONT_PIXEL),
         icon=icon,
         on_click=on_click,
-        style=ft.ButtonStyle(color=color),
+        style=ft.ButtonStyle(
+            color=color,
+            shape=ft.RoundedRectangleBorder(radius=RADIUS),
+        ),
     )
 
 
@@ -141,32 +162,32 @@ def danger_button(
     icon: str | None = None,
 ) -> ft.OutlinedButton:
     return ft.OutlinedButton(
-        text=text,
+        content=ft.Text(text, size=10, color=ERROR, font_family=FONT_PIXEL),
         icon=icon,
         on_click=on_click,
         style=ft.ButtonStyle(
             color=ERROR,
-            side=ft.BorderSide(1, ERROR),
-            shape=ft.RoundedRectangleBorder(radius=6),
+            side=ft.BorderSide(2, ERROR),
+            shape=ft.RoundedRectangleBorder(radius=RADIUS),
         ),
     )
 
 
-def section_title(text: str, size: int = 16) -> ft.Text:
-    return ft.Text(text, size=size, weight=ft.FontWeight.W_600, color=TEXT)
+def section_title(text: str, size: int = 13) -> ft.Text:
+    return ft.Text(text, size=size, weight=ft.FontWeight.W_600, color=TEXT, font_family=FONT_PIXEL)
 
 
 def muted_text(text: str, size: int = 13) -> ft.Text:
-    return ft.Text(text, size=size, color=TEXT_MUTED)
+    return ft.Text(text, size=size, color=TEXT_MUTED, font_family=FONT_MONO)
 
 
 def tag_chip(label: str, color: str = ACCENT) -> ft.Container:
     return ft.Container(
-        content=ft.Text(label, size=11, color=ft.Colors.WHITE),
+        content=ft.Text(label, size=11, color=TEXT, font_family=FONT_MONO),
         padding=ft.Padding.symmetric(horizontal=8, vertical=3),
-        border_radius=12,
-        bgcolor=color + "33",
-        border=ft.Border.all(1, color + "66"),
+        border_radius=RADIUS,
+        bgcolor=SURFACE2,
+        border=ft.Border.all(2, BORDER),
     )
 
 
@@ -177,24 +198,69 @@ def status_badge(label: str, active: bool) -> ft.Container:
         content=ft.Row(
             [
                 ft.Container(
-                    width=6,
-                    height=6,
-                    border_radius=3,
+                    width=8,
+                    height=8,
+                    border_radius=RADIUS,
                     bgcolor=color,
                 ),
-                ft.Text(label, size=11, color=color),
+                ft.Text(label, size=11, color=color, font_family=FONT_MONO),
             ],
             spacing=4,
             tight=True,
         ),
         padding=ft.Padding.symmetric(horizontal=8, vertical=4),
-        border_radius=12,
+        border_radius=RADIUS,
         bgcolor=bg,
+        border=ft.Border.all(2, BORDER),
     )
 
 
 def divider() -> ft.Divider:
-    return ft.Divider(height=1, color=BORDER)
+    return ft.Divider(height=2, color=BORDER)
+
+
+def build_tabs(
+    tabs: list[tuple[str, str, ft.Control]],
+    selected_index: int = 0,
+    on_change: Any = None,
+    expand: bool = True,
+) -> ft.Tabs:
+    """Build a Flet 0.86 Material-3 Tabs control.
+
+    `tabs` is a list of (label, icon, content) tuples. The Tab headers live in a
+    TabBar and their bodies in a TabBarView, both wrapped by a Tabs control.
+    """
+    def _coerce_icon(icon: Any) -> Any:
+        # Icons are ft.Icons enum members (int code points) in Flet 0.85+;
+        # a lowercase string name won't render, so map it to the enum.
+        if isinstance(icon, str):
+            return getattr(ft.Icons, icon.upper(), None)
+        return icon
+
+    return ft.Tabs(
+        length=len(tabs),
+        selected_index=selected_index,
+        animation_duration=200,
+        on_change=on_change,
+        expand=expand,
+        content=ft.Column(
+            [
+                ft.TabBar(
+                    scrollable=False,
+                    tabs=[
+                        ft.Tab(label=label, icon=_coerce_icon(icon))
+                        for label, icon, _ in tabs
+                    ],
+                ),
+                ft.TabBarView(
+                    controls=[content for _, _, content in tabs],
+                    expand=True,
+                ),
+            ],
+            expand=True,
+            spacing=0,
+        ),
+    )
 
 
 # ── Node Card ─────────────────────────────────────────────────────────────────
@@ -221,9 +287,10 @@ def node_card(
                         content=ft.Text(icon, size=18),
                         width=32,
                         height=32,
-                        border_radius=6,
+                        border_radius=RADIUS,
                         bgcolor=color + "33",
-                        alignment=ft.alignment.center,
+                        border=ft.Border.all(2, BORDER),
+                        alignment=ft.Alignment.CENTER,
                     ),
                     ft.Column(
                         [
@@ -270,9 +337,9 @@ def node_card(
     return ft.Container(
         content=content,
         padding=10,
-        border_radius=8,
+        border_radius=RADIUS,
         bgcolor=SURFACE2,
-        border=ft.Border.all(1, color + "44"),
+        border=ft.Border.all(2, BORDER),
         on_click=on_click,
         ink=True,
     )
@@ -313,11 +380,13 @@ def connection_diagram(workflow: dict[str, Any]) -> ft.Control:
                     content=ft.Text(
                         f"{icon}  {node_name}",
                         size=13,
-                        color=color,
+                        color=TEXT,
+                        font_family=FONT_MONO,
                     ),
                     padding=ft.Padding.symmetric(horizontal=10, vertical=6),
-                    border_radius=6,
+                    border_radius=RADIUS,
                     bgcolor=SURFACE2,
+                    border=ft.Border.all(2, BORDER),
                 )
             )
         return ft.Column(items, spacing=4)
@@ -333,13 +402,14 @@ def connection_diagram(workflow: dict[str, Any]) -> ft.Control:
                 content=ft.Text(
                     f"{icon}  {node_name}",
                     size=12,
-                    color=color,
+                    color=TEXT,
                     weight=ft.FontWeight.W_500,
+                    font_family=FONT_MONO,
                 ),
                 padding=ft.Padding.symmetric(horizontal=10, vertical=6),
-                border_radius=6,
-                bgcolor=color + "22",
-                border=ft.Border.all(1, color + "55"),
+                border_radius=RADIUS,
+                bgcolor=SURFACE2,
+                border=ft.Border.all(2, BORDER),
             )
         )
 
@@ -433,10 +503,10 @@ def json_text_view(json_str: str, max_height: int = 400) -> ft.Container:
             ],
             expand=True,
         ),
-        bgcolor="#0d1117",
-        border_radius=8,
+        bgcolor="#0d0d0d",
+        border_radius=RADIUS,
         padding=12,
-        border=ft.Border.all(1, BORDER),
+        border=ft.Border.all(2, BORDER),
         height=max_height,
     )
 
@@ -496,13 +566,13 @@ def loading_spinner(message: str = "Processing...") -> ft.Container:
     return ft.Container(
         content=ft.Column(
             [
-                ft.ProgressRing(width=40, height=40, stroke_width=3, color=ACCENT),
-                ft.Text(message, color=TEXT_MUTED, size=13),
+                ft.ProgressRing(width=40, height=40, stroke_width=4, color=ACCENT),
+                ft.Text(message, color=TEXT_MUTED, size=13, font_family=FONT_MONO),
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=12,
         ),
-        alignment=ft.alignment.center,
+        alignment=ft.Alignment.CENTER,
         expand=True,
     )
 
@@ -517,8 +587,8 @@ def empty_state(
 ) -> ft.Container:
     children: list[ft.Control] = [
         ft.Text(icon, size=48),
-        ft.Text(title, size=16, weight=ft.FontWeight.W_600, color=TEXT),
-        ft.Text(subtitle, size=13, color=TEXT_MUTED, text_align=ft.TextAlign.CENTER),
+        ft.Text(title, size=14, weight=ft.FontWeight.W_600, color=TEXT, font_family=FONT_PIXEL),
+        ft.Text(subtitle, size=13, color=TEXT_MUTED, text_align=ft.TextAlign.CENTER, font_family=FONT_MONO),
     ]
     if action:
         children.append(ft.Container(height=4))
@@ -530,7 +600,7 @@ def empty_state(
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             spacing=8,
         ),
-        alignment=ft.alignment.center,
+        alignment=ft.Alignment.CENTER,
         expand=True,
     )
 
@@ -539,10 +609,10 @@ def empty_state(
 
 def show_snack(page: ft.Page, message: str, error: bool = False) -> None:
     color = ERROR if error else SUCCESS
-    page.snack_bar = ft.SnackBar(
-        content=ft.Text(message, color=ft.Colors.WHITE),
-        bgcolor=color,
-        duration=3000,
+    page.show_dialog(
+        ft.SnackBar(
+            content=ft.Text(message, color="#ffffff", font_family=FONT_MONO),
+            bgcolor=color,
+            duration=3000,
+        )
     )
-    page.snack_bar.open = True
-    page.update()
