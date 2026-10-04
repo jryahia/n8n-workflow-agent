@@ -1,5 +1,23 @@
 # n8n Workflow Agent
 
+**Type a goal in plain language, get a validated n8n workflow JSON, and deploy it to a live n8n instance with one click.**
+
+![Python](https://img.shields.io/badge/Python-161b22?style=for-the-badge&labelColor=161b22&color=161b22) ![FastAPI](https://img.shields.io/badge/FastAPI-161b22?style=for-the-badge&labelColor=161b22&color=161b22) ![Flet](https://img.shields.io/badge/Flet-161b22?style=for-the-badge&labelColor=161b22&color=161b22) ![n8n](https://img.shields.io/badge/n8n-161b22?style=for-the-badge&labelColor=161b22&color=161b22) ![OpenAI](https://img.shields.io/badge/OpenAI-161b22?style=for-the-badge&labelColor=161b22&color=161b22) ![Claude](https://img.shields.io/badge/Claude-161b22?style=for-the-badge&labelColor=161b22&color=161b22) ![Docker](https://img.shields.io/badge/Docker-161b22?style=for-the-badge&labelColor=161b22&color=161b22)
+
+```mermaid
+flowchart LR
+    S0["Natural-language goal"]
+    S1["LLM intent parsing"]
+    S2["Workflow JSON generation"]
+    S3["Schema validation"]
+    S4["Deploy via n8n REST API"]
+    S0 --> S1 --> S2 --> S3 --> S4
+```
+
+## Problem it solves
+
+Building n8n workflows means knowing node names, parameters and connection rules. This agent generates the workflow from a description, validates it and pushes it through the n8n REST API.
+
 AI-powered n8n workflow generator. Type a natural language prompt → get a complete, deployment-ready n8n workflow JSON — and push it to your running n8n instance with one click.
 
 ## What It Does
@@ -20,8 +38,8 @@ cp .env.example .env
 docker compose up -d
 ```
 
-n8n will be at http://localhost:5678  
-Agent API at http://localhost:8000  
+n8n will be at http://localhost:5678
+Agent API at http://localhost:8000
 
 ### Option B — Local Development
 
