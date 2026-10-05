@@ -43,28 +43,28 @@ JSON_BOOL = "#a8a8a8"
 JSON_NULL = "#787878"
 
 # ── Node Type Icons ───────────────────────────────────────────────────────────
-NODE_TYPE_ICONS: dict[str, str] = {
-    "n8n-nodes-base.scheduleTrigger": "⏰",
-    "n8n-nodes-base.webhook": "🌐",
-    "n8n-nodes-base.start": "▶️",
-    "n8n-nodes-base.chatTrigger": "💬",
-    "n8n-nodes-base.httpRequest": "🌍",
-    "n8n-nodes-base.if": "🔀",
-    "n8n-nodes-base.switch": "⚡",
-    "n8n-nodes-base.code": "💻",
-    "n8n-nodes-base.wait": "⏳",
-    "n8n-nodes-base.splitInBatches": "📦",
-    "n8n-nodes-base.merge": "🔗",
-    "n8n-nodes-base.set": "📝",
-    "n8n-nodes-base.telegram": "📱",
-    "n8n-nodes-base.slack": "💬",
-    "n8n-nodes-base.discord": "🎮",
-    "n8n-nodes-base.emailSend": "📧",
-    "n8n-nodes-base.emailReadImap": "📬",
-    "n8n-nodes-base.notion": "📓",
-    "n8n-nodes-base.googleSheets": "📊",
-    "n8n-nodes-base.openAi": "🤖",
-    "n8n-nodes-base.respondToWebhook": "↩️",
+NODE_TYPE_ICONS: dict[str, ft.IconData] = {
+    "n8n-nodes-base.scheduleTrigger": ft.Icons.SCHEDULE,
+    "n8n-nodes-base.webhook": ft.Icons.WEBHOOK,
+    "n8n-nodes-base.start": ft.Icons.PLAY_ARROW,
+    "n8n-nodes-base.chatTrigger": ft.Icons.CHAT,
+    "n8n-nodes-base.httpRequest": ft.Icons.PUBLIC,
+    "n8n-nodes-base.if": ft.Icons.CALL_SPLIT,
+    "n8n-nodes-base.switch": ft.Icons.ALT_ROUTE,
+    "n8n-nodes-base.code": ft.Icons.CODE,
+    "n8n-nodes-base.wait": ft.Icons.HOURGLASS_EMPTY,
+    "n8n-nodes-base.splitInBatches": ft.Icons.INVENTORY_2,
+    "n8n-nodes-base.merge": ft.Icons.MERGE,
+    "n8n-nodes-base.set": ft.Icons.EDIT_NOTE,
+    "n8n-nodes-base.telegram": ft.Icons.SEND,
+    "n8n-nodes-base.slack": ft.Icons.CHAT,
+    "n8n-nodes-base.discord": ft.Icons.FORUM,
+    "n8n-nodes-base.emailSend": ft.Icons.EMAIL,
+    "n8n-nodes-base.emailReadImap": ft.Icons.MARK_EMAIL_UNREAD,
+    "n8n-nodes-base.notion": ft.Icons.MENU_BOOK,
+    "n8n-nodes-base.googleSheets": ft.Icons.TABLE_CHART,
+    "n8n-nodes-base.openAi": ft.Icons.SMART_TOY,
+    "n8n-nodes-base.respondToWebhook": ft.Icons.REPLY,
 }
 
 NODE_TYPE_COLORS: dict[str, str] = {
@@ -90,8 +90,8 @@ NODE_TYPE_COLORS: dict[str, str] = {
 }
 
 
-def get_node_icon(node_type: str) -> str:
-    return NODE_TYPE_ICONS.get(node_type, "🔲")
+def get_node_icon(node_type: str) -> ft.IconData:
+    return NODE_TYPE_ICONS.get(node_type, ft.Icons.CHECK_BOX_OUTLINE_BLANK)
 
 
 def get_node_color(node_type: str) -> str:
@@ -284,7 +284,7 @@ def node_card(
             ft.Row(
                 [
                     ft.Container(
-                        content=ft.Text(icon, size=18),
+                        content=ft.Icon(icon, size=18, color=color),
                         width=32,
                         height=32,
                         border_radius=RADIUS,
@@ -378,7 +378,7 @@ def connection_diagram(workflow: dict[str, Any]) -> ft.Control:
             items.append(
                 ft.Container(
                     content=ft.Text(
-                        f"{icon}  {node_name}",
+                        node_name,
                         size=13,
                         color=TEXT,
                         font_family=FONT_MONO,
@@ -400,7 +400,7 @@ def connection_diagram(workflow: dict[str, Any]) -> ft.Control:
         row_items.append(
             ft.Container(
                 content=ft.Text(
-                    f"{icon}  {node_name}",
+                    node_name,
                     size=12,
                     color=TEXT,
                     weight=ft.FontWeight.W_500,
@@ -580,13 +580,13 @@ def loading_spinner(message: str = "Processing...") -> ft.Container:
 # ── Empty State ───────────────────────────────────────────────────────────────
 
 def empty_state(
-    icon: str,
+    icon: ft.IconData,
     title: str,
     subtitle: str,
     action: ft.Control | None = None,
 ) -> ft.Container:
     children: list[ft.Control] = [
-        ft.Text(icon, size=48),
+        ft.Icon(icon, size=48, color=TEXT_MUTED),
         ft.Text(title, size=14, weight=ft.FontWeight.W_600, color=TEXT, font_family=FONT_PIXEL),
         ft.Text(subtitle, size=13, color=TEXT_MUTED, text_align=ft.TextAlign.CENTER, font_family=FONT_MONO),
     ]

@@ -17,7 +17,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.start",
         "typeVersion": 1,
         "description": "Manual trigger — starts the workflow when executed manually",
-        "icon": "▶️",
+        "icon": "play_arrow",
         "parameters": {},
         "example_names": ["Start", "Manual Trigger"],
     },
@@ -25,7 +25,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 1,
         "description": "HTTP Webhook trigger — starts workflow on incoming HTTP request",
-        "icon": "🌐",
+        "icon": "webhook",
         "parameters": {
             "httpMethod": "POST",
             "path": "webhook",
@@ -38,7 +38,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1,
         "description": "Schedule trigger — runs workflow on cron or interval basis",
-        "icon": "⏰",
+        "icon": "schedule",
         "parameters": {
             "rule": {
                 "interval": [
@@ -82,7 +82,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.chatTrigger",
         "typeVersion": 1,
         "description": "Chat trigger — receives messages from n8n chat interface",
-        "icon": "💬",
+        "icon": "chat",
         "parameters": {
             "mode": "webhook",
             "options": {},
@@ -94,7 +94,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4,
         "description": "Make HTTP requests to any API or URL",
-        "icon": "🌍",
+        "icon": "public",
         "parameters": {
             "method": "GET",
             "url": "https://api.example.com/data",
@@ -139,7 +139,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.if",
         "typeVersion": 1,
         "description": "Conditional branch — route data based on conditions",
-        "icon": "🔀",
+        "icon": "call_split",
         "parameters": {
             "conditions": {
                 "string": [
@@ -157,7 +157,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.switch",
         "typeVersion": 1,
         "description": "Multi-branch switch — route to one of multiple outputs",
-        "icon": "⚡",
+        "icon": "alt_route",
         "parameters": {
             "dataType": "string",
             "value1": "={{ $json.type }}",
@@ -175,7 +175,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "description": "Run custom JavaScript code to transform data",
-        "icon": "💻",
+        "icon": "code",
         "parameters": {
             "jsCode": "// Transform input items\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    processed: true,\n    timestamp: new Date().toISOString()\n  }\n}));",
         },
@@ -196,7 +196,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.wait",
         "typeVersion": 1,
         "description": "Pause workflow execution for a specified duration",
-        "icon": "⏳",
+        "icon": "hourglass_empty",
         "parameters": {
             "resume": "after",
             "amount": 1,
@@ -208,7 +208,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.splitInBatches",
         "typeVersion": 3,
         "description": "Split items into batches for processing",
-        "icon": "📦",
+        "icon": "inventory_2",
         "parameters": {
             "batchSize": 10,
             "options": {},
@@ -219,7 +219,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.merge",
         "typeVersion": 2,
         "description": "Merge data from multiple branches",
-        "icon": "🔗",
+        "icon": "merge",
         "parameters": {
             "mode": "combine",
             "combinationMode": "mergeByPosition",
@@ -231,7 +231,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.set",
         "typeVersion": 3,
         "description": "Set or transform data fields",
-        "icon": "📝",
+        "icon": "edit_note",
         "parameters": {
             "mode": "manual",
             "duplicateItem": False,
@@ -276,7 +276,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.telegram",
         "typeVersion": 1,
         "description": "Send messages or media via Telegram Bot API",
-        "icon": "📱",
+        "icon": "send",
         "parameters": {
             "resource": "message",
             "operation": "sendMessage",
@@ -290,7 +290,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.slack",
         "typeVersion": 2,
         "description": "Post messages or interact with Slack channels",
-        "icon": "💬",
+        "icon": "chat",
         "parameters": {
             "resource": "message",
             "operation": "post",
@@ -309,7 +309,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.discord",
         "typeVersion": 2,
         "description": "Send messages to Discord via webhook or bot",
-        "icon": "🎮",
+        "icon": "forum",
         "parameters": {
             "resource": "message",
             "operation": "send",
@@ -323,7 +323,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2,
         "description": "Send emails via SMTP",
-        "icon": "📧",
+        "icon": "email",
         "parameters": {
             "fromEmail": "noreply@example.com",
             "toEmail": "recipient@example.com",
@@ -338,7 +338,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.emailReadImap",
         "typeVersion": 2,
         "description": "Read emails from IMAP mailbox",
-        "icon": "📬",
+        "icon": "mark_email_unread",
         "parameters": {
             "mailbox": "INBOX",
             "action": "read",
@@ -353,7 +353,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.notion",
         "typeVersion": 2,
         "description": "Create and update pages in Notion databases",
-        "icon": "📓",
+        "icon": "menu_book",
         "parameters": {
             "resource": "databasePage",
             "operation": "create",
@@ -373,7 +373,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.googleSheets",
         "typeVersion": 4,
         "description": "Read from and write to Google Sheets",
-        "icon": "📊",
+        "icon": "table_chart",
         "parameters": {
             "resource": "sheet",
             "operation": "append",
@@ -399,7 +399,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.openAi",
         "typeVersion": 1,
         "description": "Make requests to OpenAI API for text generation",
-        "icon": "🤖",
+        "icon": "smart_toy",
         "parameters": {
             "resource": "text",
             "operation": "message",
@@ -426,7 +426,7 @@ NODE_TEMPLATES: dict[str, dict[str, Any]] = {
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1,
         "description": "Send a response back to the webhook caller",
-        "icon": "↩️",
+        "icon": "reply",
         "parameters": {
             "respondWith": "json",
             "responseBody": "={{ JSON.stringify($json) }}",

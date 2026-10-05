@@ -225,7 +225,7 @@ class EditorView(ft.Column):
             content=ft.Row(
                 [
                     ft.Container(
-                        content=ft.Text(icon, size=16),
+                        content=ft.Icon(icon, size=16, color=color),
                         width=28,
                         height=28,
                         border_radius=0,

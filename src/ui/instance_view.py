@@ -128,7 +128,7 @@ class InstanceView(ft.Column):
                 url = data.get("url", "")
                 self._workflows_col.controls = [
                     empty_state(
-                        "🔌",
+                        ft.Icons.POWER_OFF,
                         "n8n instance not reachable",
                         f"Configure the n8n URL in Settings.\nCurrent URL: {url}",
                     )
@@ -193,7 +193,7 @@ class InstanceView(ft.Column):
             elif response.status_code == 502:
                 detail = response.json().get("detail", "n8n unreachable")
                 self._workflows_col.controls = [
-                    empty_state("🔌", "Cannot reach n8n", detail)
+                    empty_state(ft.Icons.POWER_OFF, "Cannot reach n8n", detail)
                 ]
             else:
                 self._workflows_col.controls = [
@@ -211,7 +211,7 @@ class InstanceView(ft.Column):
         if not self._workflows:
             self._workflows_col.controls = [
                 empty_state(
-                    "📋",
+                    ft.Icons.CONTENT_PASTE,
                     "No workflows in n8n",
                     "Deploy a workflow from the Library tab to see it here",
                 )
@@ -350,7 +350,7 @@ class InstanceView(ft.Column):
                 ft.Container(
                     content=ft.Row(
                         [
-                            ft.Text("🔑", size=16),
+                            ft.Icon(ft.Icons.KEY, size=16),
                             ft.Column(
                                 [
                                     ft.Text(cred.get("name", ""), size=13, color=TEXT),

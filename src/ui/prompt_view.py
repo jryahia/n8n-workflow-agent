@@ -158,7 +158,7 @@ class PromptView(ft.Column):
 
     def _empty_state(self) -> ft.Container:
         return empty_state(
-            "🤖",
+            ft.Icons.SMART_TOY,
             "Ready to generate",
             "Type a natural language description above\nand click Generate Workflow",
         )
@@ -377,7 +377,7 @@ class PromptView(ft.Column):
         return ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("⚠️", size=40),
+                    ft.Icon(ft.Icons.WARNING_AMBER, size=40),
                     ft.Text(
                         "Generation Failed",
                         size=16,

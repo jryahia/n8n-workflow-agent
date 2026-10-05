@@ -233,7 +233,7 @@ class LibraryView(ft.Column):
         if not self._workflows_data:
             self._workflows_col.controls = [
                 empty_state(
-                    "📂",
+                    ft.Icons.FOLDER_OPEN,
                     "No workflows yet",
                     "Generate a workflow from the Prompt tab to see it here",
                 )

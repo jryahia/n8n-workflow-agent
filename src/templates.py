@@ -62,7 +62,7 @@ def _build_crypto_price_alert() -> dict[str, Any]:
                             {
                                 "id": "1",
                                 "name": "message",
-                                "value": "={{ '🚀 Crypto Update\\nBTC: $' + $json.bitcoin.usd + '\\nETH: $' + $json.ethereum.usd }}",
+                                "value": "={{ 'Crypto Update\\nBTC: $' + $json.bitcoin.usd + '\\nETH: $' + $json.ethereum.usd }}",
                                 "type": "string",
                             }
                         ]
