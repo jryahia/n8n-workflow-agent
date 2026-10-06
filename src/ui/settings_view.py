@@ -323,14 +323,14 @@ class SettingsView(ft.Column):
             async with httpx.AsyncClient(timeout=10) as client:
                 response = await client.get(f"{url}/healthz")
             if response.status_code == 200:
-                self._n8n_status.value = "✓ n8n is reachable"
+                self._n8n_status.value = "n8n is reachable"
                 self._n8n_status.color = SUCCESS
                 show_snack(self.page, "n8n connection successful!")
             else:
-                self._n8n_status.value = f"✗ n8n returned {response.status_code}"
+                self._n8n_status.value = f"n8n returned {response.status_code}"
                 self._n8n_status.color = ERROR
         except Exception as exc:
-            self._n8n_status.value = f"✗ Cannot reach n8n: {exc}"
+            self._n8n_status.value = f"Cannot reach n8n: {exc}"
             self._n8n_status.color = ERROR
 
         try:
